@@ -1,12 +1,7 @@
 FROM drupal:latest
 
-# Install additional PHP extensions that Drupal may need
-# Using specific version numbers for compatibility with current PHP version
-RUN apt-get update && apt-get install -y \
-    php8.4-gd \
-    php8.4-xml \
-    php8.4-curl \
-    php8.4-mbstring \
+# Install PostgreSQL client for potential migrations/backups
+RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
