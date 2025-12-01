@@ -1,12 +1,16 @@
 FROM php:8.3-apache
 
-# Install system dependencies for Drupal
+# Install system dependencies for Drupal (without composer from apt, use direct download)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    composer \
     git \
     postgresql-client \
     libpq-dev \
+    unzip \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Download and install Composer directly
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install PHP extensions required by Drupal
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
