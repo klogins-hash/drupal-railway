@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: drupal-postgres
+    environment:
+      POSTGRES_DB: drupal
+      POSTGRES_USER: drupal
+      POSTGRES_PASSWORD: drupal_secure_password_123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U drupal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - drupal-network
+    restart: unless_stopped
+
+  drupal:
+    build:
+      context: .
+      dockerfile: Dockerfile.drupal
+    container_name: drupal-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DRUPAL_DB_HOST: postgres
+      DRUPAL_DB_NAME: drupal
+      DRUPAL_DB_USER: drupal
+      DRUPAL_DB_PASSWORD: drupal_secure_password_123
+      DRUPAL_DB_PORT: 5432
+      DRUPAL_DRIVER: pgsql
+      DRUPAL_SITE_NAME: "My Drupal Site"
+      DRUPAL_SITE_MAIL: admin@example.com
+      DRUPAL_ACCOUNT_NAME: admin
+      DRUPAL_ACCOUNT_PASS: admin123
+    ports:
+      - "80:80"
+    volumes:
+      - drupal_data:/var/www/html
+    networks:
+      - drupal-network
+    restart: unless_stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+  drupal_data:
+    driver: local
+
+networks:
+  drupal-network:
+    driver: bridge

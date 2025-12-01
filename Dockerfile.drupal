@@ -1,0 +1,25 @@
+FROM drupal:latest
+
+# Install additional PHP extensions that Drupal may need
+RUN apt-get update && apt-get install -y \
+    php-gd \
+    php-dom \
+    php-simplexml \
+    php-curl \
+    php-mbstring \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy any custom modules or themes (optional - uncomment if needed)
+# COPY ./modules /var/www/html/modules/custom
+# COPY ./themes /var/www/html/themes/custom
+
+# Set proper permissions for Drupal
+RUN chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html
+
+# Expose port 80 for Apache
+EXPOSE 80
+
+# Start Apache in foreground
+CMD ["apache2-foreground"]

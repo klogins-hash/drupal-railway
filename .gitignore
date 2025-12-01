@@ -1,0 +1,43 @@
+# Operating System
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# Node/npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Drupal specific
+sites/*/settings.php
+sites/*/settings.local.php
+sites/*/files/
+sites/*/private/
+composer.lock
+
+# OS
+.env.production
+.DS_Store
+
+# Logs
+logs/
+*.log
