@@ -1,17 +1,52 @@
-FROM drupal:latest
+FROM php:8.3-apache
 
-# Install PostgreSQL client for potential migrations/backups
+# Install system dependencies for Drupal
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    composer \
+    git \
     postgresql-client \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy any custom modules or themes (optional - uncomment if needed)
-# COPY ./modules /var/www/html/modules/custom
-# COPY ./themes /var/www/html/themes/custom
+# Install PHP extensions required by Drupal
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
+    docker-php-ext-install -j$(nproc) \
+    pdo \
+    pdo_pgsql \
+    gd \
+    opcache \
+    && rm -rf /src
+
+# Enable Apache modules needed for Drupal
+RUN a2enmod rewrite && \
+    a2enmod headers && \
+    a2enmod expires
+
+# Set working directory
+WORKDIR /var/www
+
+# Install Drupal 11 via Composer
+# This ensures all files are properly installed in the container
+RUN composer create-project \
+    --no-interaction \
+    --prefer-dist \
+    drupal/recommended-project:^11 \
+    html
+
+WORKDIR /var/www/html
 
 # Set proper permissions for Drupal
-RUN chown -R www-data:www-data /var/www/html && \
-    chmod -R 755 /var/www/html
+RUN chown -R www-data:www-data . && \
+    chmod -R 755 .
+
+# Create necessary Drupal directories
+RUN mkdir -p web/sites/default/files && \
+    chown -R www-data:www-data web/sites/default/files && \
+    chmod -R 755 web/sites/default/files
+
+# Copy any custom modules or themes (optional - uncomment if needed)
+# COPY ./modules web/modules/custom
+# COPY ./themes web/themes/custom
 
 # Expose port 80 for Apache
 EXPOSE 80
